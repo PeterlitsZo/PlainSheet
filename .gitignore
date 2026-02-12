@@ -90,3 +90,6 @@ typings/
 
 # Electron-Forge
 out/
+
+# For agents
+AGENTS.md
