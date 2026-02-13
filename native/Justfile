@@ -1,0 +1,5 @@
+build:
+    napi build --output-dir build --platform --release
+
+build-debug:
+    napi build --output-dir build --platform

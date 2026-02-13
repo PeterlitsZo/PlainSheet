@@ -1,6 +1,7 @@
-import { app, BrowserWindow } from "electron";
 import path from "node:path";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import started from "electron-squirrel-startup";
+import { loadNative, type NativeModule } from "./main/native";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -13,6 +14,8 @@ const createWindow = () => {
     width: 800,
     height: 600,
     webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
       preload: path.join(__dirname, "preload.js"),
     },
   });
@@ -30,10 +33,33 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
 };
 
+const registerNativeHandlers = (native: NativeModule) => {
+  ipcMain.handle("rust:plus100", (_event, input: number): number => {
+    if (!Number.isFinite(input) || !Number.isInteger(input) || input < 0) {
+      throw new Error("Input must be a non-negative integer.");
+    }
+
+    return native.plus100(input);
+  });
+};
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+app.whenReady().then(() => {
+  try {
+    const native = loadNative();
+    registerNativeHandlers(native);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Failed to load native module:", message);
+    dialog.showErrorBox("Native module failed to load", message);
+    app.quit();
+    return;
+  }
+
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
