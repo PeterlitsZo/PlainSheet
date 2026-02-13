@@ -4,6 +4,11 @@ import { app } from "electron";
 
 export type NativeModule = {
   plus100: (input: number) => number;
+  renderTypstSvg: (source: string, options?: { rootDir?: string }) => string;
+  renderTypstPng: (
+    source: string,
+    options?: { rootDir?: string; pixelPerPt?: number },
+  ) => Uint8Array;
 };
 
 const resolveNativeEntry = () => {
@@ -33,7 +38,9 @@ const resolveNativeBinary = () => {
       continue;
     }
 
-    const files = fs.readdirSync(dir).filter((entry) => entry.endsWith(".node"));
+    const files = fs
+      .readdirSync(dir)
+      .filter((entry) => entry.endsWith(".node"));
     if (files.length > 0) {
       return path.join(dir, files[0]);
     }
@@ -48,7 +55,11 @@ export const loadNative = (): NativeModule => {
   if (fs.existsSync(entryPath)) {
     try {
       const module = require(entryPath) as NativeModule;
-      if (typeof module.plus100 === "function") {
+      if (
+        typeof module.plus100 === "function" &&
+        typeof module.renderTypstSvg === "function" &&
+        typeof module.renderTypstPng === "function"
+      ) {
         return module;
       }
     } catch (error) {
@@ -60,11 +71,15 @@ export const loadNative = (): NativeModule => {
   const binaryPath = resolveNativeBinary();
   if (binaryPath) {
     const module = require(binaryPath) as NativeModule;
-    if (typeof module.plus100 === "function") {
+    if (
+      typeof module.plus100 === "function" &&
+      typeof module.renderTypstSvg === "function" &&
+      typeof module.renderTypstPng === "function"
+    ) {
       return module;
     }
   }
 
-  const hint = "Run `bun run native:build` to build the Rust module.";
+  const hint = "Run `(cd native; just build)` to build the Rust module.";
   throw new Error(`Native module not found. ${hint}`);
 };

@@ -41,6 +41,28 @@ const registerNativeHandlers = (native: NativeModule) => {
 
     return native.plus100(input);
   });
+
+  ipcMain.handle("rust:renderTypstSvg", (_event, source: string): string => {
+    if (typeof source !== "string") {
+      throw new Error("Typst source must be a string.");
+    }
+
+    return native.renderTypstSvg(source, { rootDir: app.getAppPath() });
+  });
+
+  ipcMain.handle(
+    "rust:renderTypstPng",
+    (_event, source: string, options?: { pixelPerPt?: number }): Uint8Array => {
+      if (typeof source !== "string") {
+        throw new Error("Typst source must be a string.");
+      }
+
+      return native.renderTypstPng(source, {
+        rootDir: app.getAppPath(),
+        pixelPerPt: options?.pixelPerPt,
+      });
+    },
+  );
 };
 
 // This method will be called when Electron has finished
