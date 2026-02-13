@@ -5,7 +5,7 @@ import { Editor } from "./Editor";
 import { Preview } from "./Preview";
 
 export function App() {
-  const [pngData, setPngData] = useState<Uint8Array<ArrayBuffer> | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [source, setSource] = useState('');
 
   const renderToken = useRef(0);
@@ -26,7 +26,7 @@ export function App() {
         return;
       }
 
-      setPngData(png);
+      setPreviewUrl(png);
     } catch (error) {
       console.error(error);
     }
@@ -50,7 +50,7 @@ export function App() {
   return (
     <main className={styles.App}>
       <Editor onSourceChange={setSource} className={styles.Editor} />
-      <Preview pngData={pngData} className={styles.Preview} />
+      <Preview imageUrl={previewUrl} className={styles.Preview} />
     </main>
   );
 }

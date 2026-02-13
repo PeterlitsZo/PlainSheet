@@ -8,6 +8,6 @@ contextBridge.exposeInMainWorld("rust", {
   renderTypstPng: (
     source: string,
     options?: { pixelPerPt?: number },
-  ): Promise<Uint8Array> =>
+  ): Promise<string> =>
     ipcRenderer.invoke("rust:renderTypstPng", source, options),
 });

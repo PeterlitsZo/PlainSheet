@@ -8,7 +8,7 @@ declare global {
       renderTypstPng: (
         source: string,
         options?: { pixelPerPt?: number },
-      ) => Promise<Uint8Array<ArrayBuffer>>;
+      ) => Promise<string>;
     };
   }
 }

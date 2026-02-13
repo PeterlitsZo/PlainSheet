@@ -2,6 +2,7 @@ import path from "node:path";
 import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import started from "electron-squirrel-startup";
 import { loadNative, type NativeModule } from "./main/native";
+import { registerTypstProtocol, storeTypstPreview } from "./main/protocol";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -52,15 +53,16 @@ const registerNativeHandlers = (native: NativeModule) => {
 
   ipcMain.handle(
     "rust:renderTypstPng",
-    (_event, source: string, options?: { pixelPerPt?: number }): Uint8Array => {
+    (_event, source: string, options?: { pixelPerPt?: number }): string => {
       if (typeof source !== "string") {
         throw new Error("Typst source must be a string.");
       }
 
-      return native.renderTypstPng(source, {
+      const png = native.renderTypstPng(source, {
         rootDir: app.getAppPath(),
         pixelPerPt: options?.pixelPerPt,
       });
+      return storeTypstPreview(png);
     },
   );
 };
@@ -72,6 +74,7 @@ app.whenReady().then(() => {
   try {
     const native = loadNative();
     registerNativeHandlers(native);
+    registerTypstProtocol();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("Failed to load native module:", message);
