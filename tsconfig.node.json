@@ -8,7 +8,12 @@
     "types": ["node"]
   },
   "include": [
+    "forge.env.d.ts",
     "forge.config.ts",
+    "src/main.ts",
+    "src/preload.ts",
+    "src/main/**/*.ts",
+    "native/build/index.d.ts",
     "vite.main.config.mts",
     "vite.preload.config.mts",
     "vite.renderer.config.mts"

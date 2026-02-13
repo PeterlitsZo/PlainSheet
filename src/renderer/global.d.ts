@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 declare global {
   interface Window {
     rust: {
@@ -6,7 +8,7 @@ declare global {
       renderTypstPng: (
         source: string,
         options?: { pixelPerPt?: number },
-      ) => Promise<Uint8Array>;
+      ) => Promise<Uint8Array<ArrayBuffer>>;
     };
   }
 }
