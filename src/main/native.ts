@@ -11,6 +11,19 @@ export type NativeModule = {
   ) => Uint8Array;
 };
 
+type NativeRenderer = {
+  renderTypstSvg: (source: string, options?: { rootDir?: string }) => string;
+  renderTypstPng: (
+    source: string,
+    options?: { rootDir?: string; pixelPerPt?: number },
+  ) => Uint8Array;
+};
+
+type NativeBindings = {
+  plus100?: (input: number) => number;
+  TypstRenderer?: new () => NativeRenderer;
+};
+
 const resolveNativeEntry = () => {
   const candidates = [
     path.join(app.getAppPath(), "native", "build", "index.js"),
@@ -49,18 +62,40 @@ const resolveNativeBinary = () => {
   return null;
 };
 
+const createNativeModule = (module: NativeBindings): NativeModule | null => {
+  if (
+    typeof module.plus100 !== "function" ||
+    typeof module.TypstRenderer !== "function"
+  ) {
+    return null;
+  }
+
+  const renderer = new module.TypstRenderer();
+  if (
+    typeof renderer.renderTypstSvg !== "function" ||
+    typeof renderer.renderTypstPng !== "function"
+  ) {
+    return null;
+  }
+
+  return {
+    plus100: module.plus100,
+    renderTypstSvg: (source, options) =>
+      renderer.renderTypstSvg(source, options),
+    renderTypstPng: (source, options) =>
+      renderer.renderTypstPng(source, options),
+  };
+};
+
 export const loadNative = (): NativeModule => {
   const entryPath = resolveNativeEntry();
 
   if (fs.existsSync(entryPath)) {
     try {
-      const module = require(entryPath) as NativeModule;
-      if (
-        typeof module.plus100 === "function" &&
-        typeof module.renderTypstSvg === "function" &&
-        typeof module.renderTypstPng === "function"
-      ) {
-        return module;
+      const module = require(entryPath) as NativeBindings;
+      const native = createNativeModule(module);
+      if (native) {
+        return native;
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -70,13 +105,10 @@ export const loadNative = (): NativeModule => {
 
   const binaryPath = resolveNativeBinary();
   if (binaryPath) {
-    const module = require(binaryPath) as NativeModule;
-    if (
-      typeof module.plus100 === "function" &&
-      typeof module.renderTypstSvg === "function" &&
-      typeof module.renderTypstPng === "function"
-    ) {
-      return module;
+    const module = require(binaryPath) as NativeBindings;
+    const native = createNativeModule(module);
+    if (native) {
+      return native;
     }
   }
 

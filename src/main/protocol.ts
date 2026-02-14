@@ -1,5 +1,5 @@
-import { randomUUID } from "node:crypto";
 import { Buffer } from "node:buffer";
+import { randomUUID } from "node:crypto";
 import { protocol } from "electron";
 
 const TYPST_PROTOCOL = "plainsheet";
