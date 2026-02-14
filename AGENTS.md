@@ -44,6 +44,15 @@
 - Avoid unrelated refactors.
 - Place new logic in existing modules when possible (for example, protocol logic in `src/main/protocol.ts`).
 
+## Git Commit Message Format
+
+- Follow Conventional Commits with optional scope.
+- Recommended pattern: `<type>(<scope>): <Summary>.`
+- If scope is unnecessary, use: `<type>: <Summary>.`
+- Keep `<Summary>` as an imperative sentence, start with an uppercase letter, and end with a period.
+- Common types in this repo: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`.
+- For native/N-API related changes, prefer `native` as scope (example: `refactor(native): Reduce exposed N-API surface.`).
+
 ## Validation Requirements
 
 - After TypeScript/main/renderer changes, run at least: `bun run lint`.
