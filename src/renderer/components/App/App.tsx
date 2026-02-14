@@ -11,7 +11,7 @@ export function App() {
   const renderToken = useRef(0);
 
   const renderTypst = useCallback(async (value: string) => {
-    if (!window.rust) {
+    if (!window.native) {
       return;
     }
 
@@ -19,7 +19,7 @@ export function App() {
     renderToken.current = requestId;
 
     try {
-      const png = await window.rust.renderTypstPng(value, {
+      const png = await window.native.renderTypstPng(value, {
         pixelPerPt: 4,
       });
       if (renderToken.current !== requestId) {

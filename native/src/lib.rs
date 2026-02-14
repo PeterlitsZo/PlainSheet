@@ -16,11 +16,6 @@ use typst_kit::fonts::{FontSearcher, Fonts};
 use typst_render::render_merged;
 use typst_world::TypstWorld;
 
-#[napi]
-pub fn plus_100(input: u32) -> u32 {
-    input + 100
-}
-
 #[napi(object)]
 pub struct RenderOptions {
     pub root_dir: Option<String>,
@@ -82,19 +77,6 @@ impl TypstRenderer {
         Self {
             engine: Mutex::new(RenderEngine::new()),
         }
-    }
-
-    #[napi]
-    pub fn render_typst_svg(
-        &self,
-        source: String,
-        options: Option<RenderOptions>,
-    ) -> Result<String> {
-        let root_dir = utils::resolve_root_dir(options.and_then(|options| options.root_dir));
-        self.with_world(source, root_dir, |world| {
-            let document = utils::compile_paged_document(world)?;
-            Ok(typst_svg::svg_merged(&document, typst::layout::Abs::zero()))
-        })
     }
 
     #[napi]

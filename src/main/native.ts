@@ -3,8 +3,6 @@ import path from "node:path";
 import { app } from "electron";
 
 export type NativeModule = {
-  plus100: (input: number) => number;
-  renderTypstSvg: (source: string, options?: { rootDir?: string }) => string;
   renderTypstPng: (
     source: string,
     options?: { rootDir?: string; pixelPerPt?: number },
@@ -12,7 +10,6 @@ export type NativeModule = {
 };
 
 type NativeRenderer = {
-  renderTypstSvg: (source: string, options?: { rootDir?: string }) => string;
   renderTypstPng: (
     source: string,
     options?: { rootDir?: string; pixelPerPt?: number },
@@ -63,25 +60,16 @@ const resolveNativeBinary = () => {
 };
 
 const createNativeModule = (module: NativeBindings): NativeModule | null => {
-  if (
-    typeof module.plus100 !== "function" ||
-    typeof module.TypstRenderer !== "function"
-  ) {
+  if (typeof module.TypstRenderer !== "function") {
     return null;
   }
 
   const renderer = new module.TypstRenderer();
-  if (
-    typeof renderer.renderTypstSvg !== "function" ||
-    typeof renderer.renderTypstPng !== "function"
-  ) {
+  if (typeof renderer.renderTypstPng !== "function") {
     return null;
   }
 
   return {
-    plus100: module.plus100,
-    renderTypstSvg: (source, options) =>
-      renderer.renderTypstSvg(source, options),
     renderTypstPng: (source, options) =>
       renderer.renderTypstPng(source, options),
   };

@@ -2,9 +2,7 @@
 
 declare global {
   interface Window {
-    rust: {
-      plus100: (input: number) => Promise<number>;
-      renderTypstSvg: (source: string) => Promise<string>;
+    native: {
       renderTypstPng: (
         source: string,
         options?: { pixelPerPt?: number },
