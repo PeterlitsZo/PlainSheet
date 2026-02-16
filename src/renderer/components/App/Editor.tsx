@@ -16,8 +16,8 @@ const options: editor.IStandaloneEditorConstructionOptions = {
   roundedSelection: false,
   overviewRulerBorder: false,
   scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 10 },
-  rulers: [80]
-}
+  rulers: [80],
+};
 
 interface EditorProps {
   onSourceChange: (source: string) => void;
@@ -88,21 +88,24 @@ export function Editor(props: EditorProps) {
     });
   }, []);
 
-  const handleChange = useCallback((value: string | undefined) => {
-    onSourceChange(value)
-  }, [onSourceChange]);
+  const handleChange = useCallback(
+    (value: string | undefined) => {
+      onSourceChange(value);
+    },
+    [onSourceChange],
+  );
 
   return (
     <div className={className}>
       <MonacoEditor
         height="100%"
         defaultLanguage="typst"
-        defaultValue={''}
+        defaultValue={""}
         theme="plainsheet-light"
         beforeMount={handleBeforeMount}
         onChange={handleChange}
         options={options}
       />
     </div>
-  )
+  );
 }

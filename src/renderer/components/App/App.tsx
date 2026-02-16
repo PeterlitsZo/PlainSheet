@@ -6,7 +6,7 @@ import { Preview } from "./Preview";
 
 export function App() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [source, setSource] = useState('');
+  const [source, setSource] = useState("");
 
   const renderToken = useRef(0);
 

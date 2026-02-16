@@ -3,6 +3,7 @@
 mod render_session;
 mod typst_world;
 mod utils;
+mod workspace_store;
 
 use napi::bindgen_prelude::Buffer;
 use napi::Result;

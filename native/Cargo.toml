@@ -10,12 +10,14 @@ crate-type = ["cdylib"]
 [dependencies]
 napi = "3.0.0"
 napi-derive = "3.0.0"
+rusqlite = { version = "0.37.0", features = ["bundled"] }
 typst = "0.13.1"
 typst-kit = { version = "0.13.1", features = ["fonts", "embed-fonts", "packages"] }
 typst-render = "0.13.1"
 typst-svg = "0.13.1"
 time = { version = "0.3", features = ["local-offset"] }
 tiny-skia = { version = "0.11.4", features = ["png-format"] }
+indoc = "2.0.7"
 
 [build-dependencies]
 napi-build = "2"

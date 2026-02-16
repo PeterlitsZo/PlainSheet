@@ -1,7 +1,12 @@
 import path from "node:path";
 import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import started from "electron-squirrel-startup";
-import { loadNative, type NativeModule } from "./main/native";
+import {
+  type CreateWorkspaceInput,
+  loadNative,
+  type NativeModule,
+  type UpdateWorkspaceInput,
+} from "./main/native";
 import { registerTypstProtocol, storeTypstPreview } from "./main/protocol";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -34,25 +39,146 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
 };
 
+const ensureObject = (
+  value: unknown,
+  fieldName: string,
+): Record<string, unknown> => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${fieldName} must be an object.`);
+  }
+
+  return value as Record<string, unknown>;
+};
+
+const ensureNonEmptyString = (value: unknown, fieldName: string): string => {
+  if (typeof value !== "string") {
+    throw new Error(`${fieldName} must be a string.`);
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    throw new Error(`${fieldName} cannot be empty.`);
+  }
+
+  return trimmed;
+};
+
+const ensureIntegerId = (value: unknown, fieldName: string): number => {
+  if (!Number.isInteger(value) || (value as number) <= 0) {
+    throw new Error(`${fieldName} must be a positive integer.`);
+  }
+
+  return value as number;
+};
+
+const ensureOptionalTimestamp = (
+  value: unknown,
+  fieldName: string,
+): number | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!Number.isInteger(value) || (value as number) < 0) {
+    throw new Error(`${fieldName} must be a non-negative integer timestamp.`);
+  }
+
+  return value as number;
+};
+
+const normalizeTags = (value: unknown, fieldName: string): string[] => {
+  if (!Array.isArray(value)) {
+    throw new Error(`${fieldName} must be an array of strings.`);
+  }
+
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const item of value) {
+    if (typeof item !== "string") {
+      throw new Error(`${fieldName} must be an array of strings.`);
+    }
+
+    const trimmed = item.trim();
+    if (!trimmed || seen.has(trimmed)) {
+      continue;
+    }
+    seen.add(trimmed);
+    result.push(trimmed);
+  }
+
+  return result;
+};
+
+const parseCreateWorkspaceInput = (value: unknown): CreateWorkspaceInput => {
+  const input = ensureObject(value, "createWorkspace input");
+  const path = ensureNonEmptyString(input.path, "createWorkspace.path");
+
+  const parsed: CreateWorkspaceInput = { path };
+  if (input.name !== undefined) {
+    parsed.name = ensureNonEmptyString(input.name, "createWorkspace.name");
+  }
+  if (input.pinned !== undefined) {
+    if (typeof input.pinned !== "boolean") {
+      throw new Error("createWorkspace.pinned must be a boolean.");
+    }
+    parsed.pinned = input.pinned;
+  }
+  if (input.tags !== undefined) {
+    parsed.tags = normalizeTags(input.tags, "createWorkspace.tags");
+  }
+  if (input.lastOpenedAt !== undefined) {
+    parsed.lastOpenedAt = ensureOptionalTimestamp(
+      input.lastOpenedAt,
+      "createWorkspace.lastOpenedAt",
+    );
+  }
+
+  return parsed;
+};
+
+const parseUpdateWorkspaceInput = (value: unknown): UpdateWorkspaceInput => {
+  const input = ensureObject(value, "updateWorkspace input");
+  const id = ensureIntegerId(input.id, "updateWorkspace.id");
+
+  const parsed: UpdateWorkspaceInput = { id };
+  let updated = false;
+
+  if (input.path !== undefined) {
+    parsed.path = ensureNonEmptyString(input.path, "updateWorkspace.path");
+    updated = true;
+  }
+
+  if (input.name !== undefined) {
+    parsed.name = ensureNonEmptyString(input.name, "updateWorkspace.name");
+    updated = true;
+  }
+
+  if (input.pinned !== undefined) {
+    if (typeof input.pinned !== "boolean") {
+      throw new Error("updateWorkspace.pinned must be a boolean.");
+    }
+    parsed.pinned = input.pinned;
+    updated = true;
+  }
+
+  if (input.lastOpenedAt !== undefined) {
+    parsed.lastOpenedAt = ensureOptionalTimestamp(
+      input.lastOpenedAt,
+      "updateWorkspace.lastOpenedAt",
+    );
+    updated = true;
+  }
+
+  if (!updated) {
+    throw new Error("updateWorkspace requires at least one field to update.");
+  }
+
+  return parsed;
+};
+
 const registerNativeHandlers = (native: NativeModule) => {
-  ipcMain.handle("rust:plus100", (_event, input: number): number => {
-    if (!Number.isFinite(input) || !Number.isInteger(input) || input < 0) {
-      throw new Error("Input must be a non-negative integer.");
-    }
-
-    return native.plus100(input);
-  });
-
-  ipcMain.handle("rust:renderTypstSvg", (_event, source: string): string => {
-    if (typeof source !== "string") {
-      throw new Error("Typst source must be a string.");
-    }
-
-    return native.renderTypstSvg(source, { rootDir: app.getAppPath() });
-  });
-
   ipcMain.handle(
-    "rust:renderTypstPng",
+    "native:renderTypstPng",
     (_event, source: string, options?: { pixelPerPt?: number }): string => {
       if (typeof source !== "string") {
         throw new Error("Typst source must be a string.");
@@ -64,6 +190,41 @@ const registerNativeHandlers = (native: NativeModule) => {
       });
       return storeTypstPreview(png);
     },
+  );
+
+  ipcMain.handle("native:listWorkspaces", () => native.listWorkspaces());
+
+  ipcMain.handle("native:createWorkspace", (_event, input: unknown) =>
+    native.createWorkspace(parseCreateWorkspaceInput(input)),
+  );
+
+  ipcMain.handle("native:updateWorkspace", (_event, input: unknown) =>
+    native.updateWorkspace(parseUpdateWorkspaceInput(input)),
+  );
+
+  ipcMain.handle("native:removeWorkspace", (_event, id: unknown) =>
+    native.removeWorkspace(ensureIntegerId(id, "removeWorkspace.id")),
+  );
+
+  ipcMain.handle(
+    "native:setWorkspacePinned",
+    (_event, id: unknown, pinned: unknown) => {
+      const workspaceId = ensureIntegerId(id, "setWorkspacePinned.id");
+      if (typeof pinned !== "boolean") {
+        throw new Error("setWorkspacePinned.pinned must be a boolean.");
+      }
+
+      return native.setWorkspacePinned(workspaceId, pinned);
+    },
+  );
+
+  ipcMain.handle(
+    "native:setWorkspaceTags",
+    (_event, id: unknown, tags: unknown) =>
+      native.setWorkspaceTags(
+        ensureIntegerId(id, "setWorkspaceTags.id"),
+        normalizeTags(tags, "setWorkspaceTags.tags"),
+      ),
   );
 };
 

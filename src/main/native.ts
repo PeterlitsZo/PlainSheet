@@ -2,11 +2,44 @@ import fs from "node:fs";
 import path from "node:path";
 import { app } from "electron";
 
+export type WorkspaceRecord = {
+  id: number;
+  path: string;
+  name: string;
+  pinned: boolean;
+  createdAt: number;
+  lastOpenedAt: number | null;
+  tags: string[];
+  existsOnDisk: boolean;
+};
+
+export type CreateWorkspaceInput = {
+  path: string;
+  name?: string;
+  pinned?: boolean;
+  tags?: string[];
+  lastOpenedAt?: number;
+};
+
+export type UpdateWorkspaceInput = {
+  id: number;
+  path?: string;
+  name?: string;
+  pinned?: boolean;
+  lastOpenedAt?: number;
+};
+
 export type NativeModule = {
   renderTypstPng: (
     source: string,
     options?: { rootDir?: string; pixelPerPt?: number },
   ) => Uint8Array;
+  listWorkspaces: () => WorkspaceRecord[];
+  createWorkspace: (input: CreateWorkspaceInput) => WorkspaceRecord;
+  updateWorkspace: (input: UpdateWorkspaceInput) => WorkspaceRecord;
+  removeWorkspace: (id: number) => boolean;
+  setWorkspacePinned: (id: number, pinned: boolean) => WorkspaceRecord;
+  setWorkspaceTags: (id: number, tags: string[]) => WorkspaceRecord;
 };
 
 type NativeRenderer = {
@@ -16,9 +49,18 @@ type NativeRenderer = {
   ) => Uint8Array;
 };
 
+type NativeWorkspaceStore = {
+  listWorkspaces: () => WorkspaceRecord[];
+  createWorkspace: (input: CreateWorkspaceInput) => WorkspaceRecord;
+  updateWorkspace: (input: UpdateWorkspaceInput) => WorkspaceRecord;
+  removeWorkspace: (id: number) => boolean;
+  setWorkspacePinned: (id: number, pinned: boolean) => WorkspaceRecord;
+  setWorkspaceTags: (id: number, tags: string[]) => WorkspaceRecord;
+};
+
 type NativeBindings = {
-  plus100?: (input: number) => number;
   TypstRenderer?: new () => NativeRenderer;
+  WorkspaceStore?: new (dbPath: string) => NativeWorkspaceStore;
 };
 
 const resolveNativeEntry = () => {
@@ -60,18 +102,42 @@ const resolveNativeBinary = () => {
 };
 
 const createNativeModule = (module: NativeBindings): NativeModule | null => {
-  if (typeof module.TypstRenderer !== "function") {
+  if (
+    typeof module.TypstRenderer !== "function" ||
+    typeof module.WorkspaceStore !== "function"
+  ) {
     return null;
   }
 
   const renderer = new module.TypstRenderer();
+  const dbPath = path.join(app.getPath("userData"), "plainsheet.sqlite3");
+  const workspaceStore = new module.WorkspaceStore(dbPath);
+
   if (typeof renderer.renderTypstPng !== "function") {
+    return null;
+  }
+
+  if (
+    typeof workspaceStore.listWorkspaces !== "function" ||
+    typeof workspaceStore.createWorkspace !== "function" ||
+    typeof workspaceStore.updateWorkspace !== "function" ||
+    typeof workspaceStore.removeWorkspace !== "function" ||
+    typeof workspaceStore.setWorkspacePinned !== "function" ||
+    typeof workspaceStore.setWorkspaceTags !== "function"
+  ) {
     return null;
   }
 
   return {
     renderTypstPng: (source, options) =>
       renderer.renderTypstPng(source, options),
+    listWorkspaces: () => workspaceStore.listWorkspaces(),
+    createWorkspace: (input) => workspaceStore.createWorkspace(input),
+    updateWorkspace: (input) => workspaceStore.updateWorkspace(input),
+    removeWorkspace: (id) => workspaceStore.removeWorkspace(id),
+    setWorkspacePinned: (id, pinned) =>
+      workspaceStore.setWorkspacePinned(id, pinned),
+    setWorkspaceTags: (id, tags) => workspaceStore.setWorkspaceTags(id, tags),
   };
 };
 
