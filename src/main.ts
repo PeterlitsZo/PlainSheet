@@ -176,9 +176,9 @@ const parseUpdateWorkspaceInput = (value: unknown): UpdateWorkspaceInput => {
   return parsed;
 };
 
-const registerNativeHandlers = (native: NativeModule) => {
+const registerAppHandlers = (native: NativeModule) => {
   ipcMain.handle(
-    "native:renderTypstPng",
+    "app:renderTypstPng",
     (_event, source: string, options?: { pixelPerPt?: number }): string => {
       if (typeof source !== "string") {
         throw new Error("Typst source must be a string.");
@@ -192,22 +192,22 @@ const registerNativeHandlers = (native: NativeModule) => {
     },
   );
 
-  ipcMain.handle("native:listWorkspaces", () => native.listWorkspaces());
+  ipcMain.handle("app:listWorkspaces", () => native.listWorkspaces());
 
-  ipcMain.handle("native:createWorkspace", (_event, input: unknown) =>
+  ipcMain.handle("app:createWorkspace", (_event, input: unknown) =>
     native.createWorkspace(parseCreateWorkspaceInput(input)),
   );
 
-  ipcMain.handle("native:updateWorkspace", (_event, input: unknown) =>
+  ipcMain.handle("app:updateWorkspace", (_event, input: unknown) =>
     native.updateWorkspace(parseUpdateWorkspaceInput(input)),
   );
 
-  ipcMain.handle("native:removeWorkspace", (_event, id: unknown) =>
+  ipcMain.handle("app:removeWorkspace", (_event, id: unknown) =>
     native.removeWorkspace(ensureIntegerId(id, "removeWorkspace.id")),
   );
 
   ipcMain.handle(
-    "native:setWorkspacePinned",
+    "app:setWorkspacePinned",
     (_event, id: unknown, pinned: unknown) => {
       const workspaceId = ensureIntegerId(id, "setWorkspacePinned.id");
       if (typeof pinned !== "boolean") {
@@ -218,14 +218,24 @@ const registerNativeHandlers = (native: NativeModule) => {
     },
   );
 
-  ipcMain.handle(
-    "native:setWorkspaceTags",
-    (_event, id: unknown, tags: unknown) =>
-      native.setWorkspaceTags(
-        ensureIntegerId(id, "setWorkspaceTags.id"),
-        normalizeTags(tags, "setWorkspaceTags.tags"),
-      ),
+  ipcMain.handle("app:setWorkspaceTags", (_event, id: unknown, tags: unknown) =>
+    native.setWorkspaceTags(
+      ensureIntegerId(id, "setWorkspaceTags.id"),
+      normalizeTags(tags, "setWorkspaceTags.tags"),
+    ),
   );
+
+  ipcMain.handle("app:pickWorkspaceDirectory", async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ["openDirectory", "createDirectory"],
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return null;
+    }
+
+    return result.filePaths[0];
+  });
 };
 
 // This method will be called when Electron has finished
@@ -234,7 +244,7 @@ const registerNativeHandlers = (native: NativeModule) => {
 app.whenReady().then(() => {
   try {
     const native = loadNative();
-    registerNativeHandlers(native);
+    registerAppHandlers(native);
     registerTypstProtocol();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

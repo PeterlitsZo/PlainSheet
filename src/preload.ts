@@ -1,11 +1,11 @@
 import { contextBridge, ipcRenderer } from "electron";
 
-contextBridge.exposeInMainWorld("native", {
+contextBridge.exposeInMainWorld("app", {
   renderTypstPng: (
     source: string,
     options?: { pixelPerPt?: number },
   ): Promise<string> =>
-    ipcRenderer.invoke("native:renderTypstPng", source, options),
+    ipcRenderer.invoke("app:renderTypstPng", source, options),
   listWorkspaces: (): Promise<
     {
       id: number;
@@ -17,7 +17,7 @@ contextBridge.exposeInMainWorld("native", {
       tags: string[];
       existsOnDisk: boolean;
     }[]
-  > => ipcRenderer.invoke("native:listWorkspaces"),
+  > => ipcRenderer.invoke("app:listWorkspaces"),
   createWorkspace: (input: {
     path: string;
     name?: string;
@@ -33,7 +33,7 @@ contextBridge.exposeInMainWorld("native", {
     lastOpenedAt: number | null;
     tags: string[];
     existsOnDisk: boolean;
-  }> => ipcRenderer.invoke("native:createWorkspace", input),
+  }> => ipcRenderer.invoke("app:createWorkspace", input),
   updateWorkspace: (input: {
     id: number;
     path?: string;
@@ -49,9 +49,9 @@ contextBridge.exposeInMainWorld("native", {
     lastOpenedAt: number | null;
     tags: string[];
     existsOnDisk: boolean;
-  }> => ipcRenderer.invoke("native:updateWorkspace", input),
+  }> => ipcRenderer.invoke("app:updateWorkspace", input),
   removeWorkspace: (id: number): Promise<boolean> =>
-    ipcRenderer.invoke("native:removeWorkspace", id),
+    ipcRenderer.invoke("app:removeWorkspace", id),
   setWorkspacePinned: (
     id: number,
     pinned: boolean,
@@ -64,7 +64,7 @@ contextBridge.exposeInMainWorld("native", {
     lastOpenedAt: number | null;
     tags: string[];
     existsOnDisk: boolean;
-  }> => ipcRenderer.invoke("native:setWorkspacePinned", id, pinned),
+  }> => ipcRenderer.invoke("app:setWorkspacePinned", id, pinned),
   setWorkspaceTags: (
     id: number,
     tags: string[],
@@ -77,5 +77,7 @@ contextBridge.exposeInMainWorld("native", {
     lastOpenedAt: number | null;
     tags: string[];
     existsOnDisk: boolean;
-  }> => ipcRenderer.invoke("native:setWorkspaceTags", id, tags),
+  }> => ipcRenderer.invoke("app:setWorkspaceTags", id, tags),
+  pickWorkspaceDirectory: (): Promise<string | null> =>
+    ipcRenderer.invoke("app:pickWorkspaceDirectory"),
 });

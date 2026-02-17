@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 
 import { App } from "./components/App";
+import { CopyUiProvider } from "./components/CopyUiProvider";
 import "./reset.css";
 
 const rootElement = document.getElementById("root");
@@ -9,4 +10,8 @@ if (!rootElement) {
   throw new Error("Root element #root not found");
 }
 
-createRoot(rootElement).render(<App />);
+createRoot(rootElement).render(
+  <CopyUiProvider>
+    <App />
+  </CopyUiProvider>,
+);

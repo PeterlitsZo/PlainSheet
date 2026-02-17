@@ -1,0 +1,18 @@
+[structure]
+components = "src/renderer/components"
+utils = "src/renderer/utils"
+
+[generator]
+class_helper = "clsx"
+import.components = "@renderer/components"
+import.utils = "@renderer/utils"
+
+[components.Button]
+
+[components.CopyUiProvider]
+with-mdx-provider = false
+with-toast-provider = false
+
+[utils.jss]
+
+[utils.resolve-style2]

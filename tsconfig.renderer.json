@@ -12,7 +12,10 @@
     "baseUrl": ".",
     "outDir": "dist",
     "resolveJsonModule": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+	    "@renderer/*": ["./src/renderer/*"],
+    },
   },
   "include": ["src/renderer/**/*"]
 }

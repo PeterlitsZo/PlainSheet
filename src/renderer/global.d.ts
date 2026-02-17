@@ -29,7 +29,7 @@ declare global {
   };
 
   interface Window {
-    native: {
+    app: {
       renderTypstPng: (
         source: string,
         options?: { pixelPerPt?: number },
@@ -50,6 +50,7 @@ declare global {
         id: number,
         tags: string[],
       ) => Promise<WorkspaceRecord>;
+      pickWorkspaceDirectory: () => Promise<string | null>;
     };
   }
 }
