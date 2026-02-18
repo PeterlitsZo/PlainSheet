@@ -1,0 +1,12 @@
+@layer components {
+  .cardHeader {
+    padding: 0.875rem 1rem 0.125rem 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+
+    &[data-with-border='true'] {
+      padding-bottom: 0.625rem;
+      border-bottom: 1px solid var(--cardHeader-bdColor);
+    }
+  }
+}

@@ -1,5 +1,5 @@
 /**
- * resolve-style2 from copy-ui @ 2025-11-23.
+ * resolve-style2 from copy-ui (version: 0.1.0, date: 2025-11-23).
  *
  * The helper to calculate styles at runtime.
  */

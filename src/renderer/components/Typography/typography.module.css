@@ -1,0 +1,9 @@
+@layer components {
+  .typography > *:first-child {
+    margin-top: 0;
+  }
+
+  .typography > *:last-child {
+    margin-bottom: 0;
+  }
+}

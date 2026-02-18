@@ -1,0 +1,16 @@
+@layer components {
+  .cardContent {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  * + .cardContent {
+    padding-top: 0.625rem;
+  }
+
+  .cardContent:has(+ *) {
+    padding-bottom: 0.625rem;
+  }
+}

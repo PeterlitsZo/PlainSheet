@@ -10,7 +10,7 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "biome check .",
+    "lint": "tsc --noEmit -p tsconfig.renderer.json && tsc --noEmit -p tsconfig.node.json && biome check .",
     "format": "biome format ."
   },
   "keywords": [],

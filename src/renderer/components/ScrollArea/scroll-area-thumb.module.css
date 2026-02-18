@@ -1,0 +1,20 @@
+@layer components {
+  .scrollAreaThumb {
+    background-color: var(--scrollAreaThumb-bgColor);
+    border-radius: 999999px;
+    position: relative;
+    cursor: pointer;
+
+    &[data-orientation="vertical"] {
+      height: calc(var(--scrollAreaThumb-h) - 8px);
+      width: calc(100% - 5px);
+      margin: 4px 2.5px;
+    }
+
+    &[data-orientation="horizontal"] {
+      width: calc(var(--scrollAreaThumb-w) - 8px);
+      height: calc(100% - 5px);
+      margin: 2.5px 4px;
+    }
+  }
+}

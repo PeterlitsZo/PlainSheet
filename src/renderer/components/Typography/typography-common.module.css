@@ -1,0 +1,24 @@
+@layer components {
+  .strong {
+    font-weight: 600;
+  }
+
+  .em {
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .p {
+    margin-bottom: 0.625rem;
+
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 400;
+  }
+
+  .a {
+    color: var(--typographyA-color);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}

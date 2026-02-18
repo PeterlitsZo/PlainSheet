@@ -5,7 +5,7 @@ import clsx from "clsx";
 import type { ComponentProps, FC } from "react";
 import tinycolor from "tinycolor2";
 
-import styles from "./button.module.scss";
+import styles from "./button.module.css";
 
 export type ButtonProps = ComponentProps<"button"> & {
   variant?: "default" | "filled" | "light" | "secondary" | "ghost" | "link";

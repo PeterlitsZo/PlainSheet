@@ -1,0 +1,18 @@
+@layer components {
+  .paper {
+    background-color: var(--paper-bg);
+    border-radius: var(--paper-border-radius);
+    box-shadow: var(--paper-box-shadow);
+    color: var(--paper-color);
+
+    overflow: hidden;
+
+    &[data-with-border='true'] {
+      border: 1px solid var(--paper-border-color);
+    }
+
+    &[data-with-padding='true'] {
+      padding: 1rem;
+    }
+  }
+}

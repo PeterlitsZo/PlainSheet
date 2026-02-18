@@ -1,0 +1,6 @@
+@layer components {
+  .card {
+    width: var(--card-width, auto);
+    max-width: var(--card-max-width, none);
+  }
+}

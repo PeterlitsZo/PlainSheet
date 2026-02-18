@@ -1,0 +1,27 @@
+@layer components {
+  .scrollAreaScrollbar {
+    &[data-orientation="vertical"] {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 0.75rem;
+      inset-inline-end: 0;
+
+      &[data-having-conflict="true"] {
+        bottom: 6px;
+      }
+    }
+
+    &[data-orientation="horizontal"] {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 0.75rem;
+      bottom: 0;
+
+      &[data-having-conflict="true"] {
+        right: 6px;
+      }
+    }
+  }
+}

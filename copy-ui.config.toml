@@ -9,9 +9,18 @@ import.utils = "@renderer/utils"
 
 [components.Button]
 
+[components.Card]
+
 [components.CopyUiProvider]
 with-mdx-provider = false
 with-toast-provider = false
+
+[components.ScrollArea]
+
+[components.Typography]
+with-typography-codeblock = false
+
+[components.Paper]
 
 [utils.jss]
 
