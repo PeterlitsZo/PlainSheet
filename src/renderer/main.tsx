@@ -1,8 +1,9 @@
 import { createRoot } from "react-dom/client";
 
+import "./reset.css";
+
 import { App } from "./components/App";
 import { CopyUiProvider } from "./components/CopyUiProvider";
-import "./reset.css";
 
 const rootElement = document.getElementById("root");
 

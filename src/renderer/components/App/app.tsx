@@ -1,9 +1,10 @@
 import { Button } from "@renderer/components/Button";
+import { Card } from "@renderer/components/Card";
 import { debounce } from "es-toolkit";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import styles from "./App.module.css";
-import { Editor } from "./Editor";
-import { Preview } from "./Preview";
+import styles from "./app.module.css";
+import { Editor } from "./editor";
+import { Preview } from "./preview";
 
 export function App() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -111,23 +112,24 @@ export function App() {
 
   if (selectedWorkspaceId === null || selectedWorkspace === null) {
     return (
-      <main className={styles.PickerPage}>
-        <section className={styles.PickerPanel}>
-          <header className={styles.PickerHeader}>
-            <h1 className={styles.PickerTitle}>Choose workspace</h1>
+      <main className={styles.pickerPage}>
+        <Card width="min(40rem, 100%)" maxWidth="100%" radius="lg">
+          <Card.Header withBorder className={styles.cardHeader}>
+            <h1>Choose workspace</h1>
             <Button
+              variant="filled"
               onClick={() => void createWorkspace()}
               disabled={isCreatingWorkspace}
             >
               {isCreatingWorkspace ? "Creating..." : "Create workspace"}
             </Button>
-          </header>
+          </Card.Header>
 
-          <div className={styles.WorkspaceList}>
+          <Card.ContentInScrollArea className={styles.workspaceList}>
             {isLoadingWorkspaces ? (
-              <p className={styles.EmptyText}>Loading workspaces...</p>
+              <p className={styles.emptyText}>Loading workspaces...</p>
             ) : workspaces.length === 0 ? (
-              <p className={styles.EmptyText}>
+              <p className={styles.emptyText}>
                 No workspaces yet. Create your first one.
               </p>
             ) : (
@@ -135,44 +137,48 @@ export function App() {
                 <button
                   key={workspace.id}
                   type="button"
-                  className={styles.WorkspaceItem}
+                  className={styles.workspaceItem}
                   onClick={() => setSelectedWorkspaceId(workspace.id)}
                 >
-                  <span className={styles.WorkspaceName}>{workspace.name}</span>
-                  <span className={styles.WorkspacePath}>{workspace.path}</span>
+                  <span className={styles.workspaceName}>{workspace.name}</span>
+                  <span className={styles.workspacePath}>{workspace.path}</span>
                   {!workspace.existsOnDisk ? (
-                    <span className={styles.WorkspaceMissing}>
+                    <span className={styles.workspaceMissing}>
                       Missing on disk
                     </span>
                   ) : null}
                 </button>
               ))
             )}
-          </div>
-        </section>
+          </Card.ContentInScrollArea>
+        </Card>
       </main>
     );
   }
 
   return (
-    <main className={styles.Shell}>
-      <aside className={styles.Sidebar}>
-        <div className={styles.SidebarHeader}>
-          <h2 className={styles.SidebarTitle}>{selectedWorkspace.name}</h2>
-          <p className={styles.SidebarPath}>{selectedWorkspace.path}</p>
+    <main className={styles.shell}>
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarHeader}>
+          <h2 className={styles.sidebarTitle}>{selectedWorkspace.name}</h2>
+          <p className={styles.sidebarPath}>{selectedWorkspace.path}</p>
           {!selectedWorkspace.existsOnDisk ? (
-            <p className={styles.WorkspaceMissing}>Missing on disk</p>
+            <p className={styles.workspaceMissing}>Missing on disk</p>
           ) : null}
         </div>
 
-        <Button variant="light" onClick={() => setSelectedWorkspaceId(null)}>
+        <Button
+          variant="filled"
+          onClick={() => setSelectedWorkspaceId(null)}
+          size="sm"
+        >
           Switch workspace
         </Button>
       </aside>
 
-      <section className={styles.Content}>
-        <Editor onSourceChange={setSource} className={styles.Editor} />
-        <Preview imageUrl={previewUrl} className={styles.Preview} />
+      <section className={styles.content}>
+        <Editor onSourceChange={setSource} className={styles.editor} />
+        <Preview imageUrl={previewUrl} className={styles.preview} />
       </section>
     </main>
   );

@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import styles from "./Preview.module.css";
+import styles from "./preview.module.css";
 
 interface PreviewProps {
   imageUrl: string | null;
